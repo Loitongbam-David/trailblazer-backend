@@ -1,0 +1,1 @@
+[phases.install]\ncmds = [\"pip install -r requirements.txt\"]\n\n[start]\ncmd = \"uvicorn app.main:app --host 0.0.0.0 --port \$PORT\"\n
