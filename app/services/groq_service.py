@@ -3,7 +3,7 @@ from app.config import settings
 
 client = Groq(api_key=settings.groq_api_key)
 
-MODEL = "llama-3.3-70b-versatile"
+MODEL = "openai/gpt-oss-120b"
 
 # ─────────────────────────────────────────────
 # 1. CONTENT SYNTHESIS — Study Guide Generator
