@@ -441,11 +441,33 @@ locust -f tests/load/locustfile.py --host http://localhost:8000
 
 ## 16. Current Test Execution Record
 
-The automated suite currently contains:
+### 16.1 Latest execution
 
-- 23 functional and algorithm tests.
-- 4 benchmark tests.
-- 27 total passing tests in the validated local run.
+| Field | Result |
+|---|---|
+| Execution date | 2026-10-28 |
+| Command | `python -m pytest -q --disable-warnings --junitxml=test-results.xml` |
+| Result | **PASS** |
+| Tests passed | 27 |
+| Tests failed | 0 |
+| Tests skipped | 0 |
+| Benchmark cases | 4 |
+| JUnit report | `test-results.xml` |
+
+The validated run completed with `27 passed` and generated a JUnit XML report for CI-compatible result publishing. The suite included 23 functional and algorithm tests plus 4 benchmark tests.
+
+### 16.2 Benchmark observations
+
+The benchmark values below are from the latest local execution and are informational, not release thresholds:
+
+| Benchmark | Mean |
+|---|---:|
+| Roadmap generation with 100 topics | 1,435.06 µs |
+| Roadmap generation with 1,000 topics | 118,180.07 µs |
+| Scheduler with 100 topics | 21,892.09 µs |
+| Resource sorting with 1,000 resources | 18,704.30 µs |
+
+The run emitted dependency deprecation warnings while still passing. These warnings do not currently fail CI, but should be reviewed during dependency upgrades.
 
 The CI workflow is configured to execute the same complete Pytest suite and publish the JUnit XML result. Load tests are available but are intentionally executed separately because they require a running service and seeded test data.
 
