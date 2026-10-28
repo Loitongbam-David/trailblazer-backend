@@ -181,186 +181,186 @@ The test cycle is complete when:
 
 ## 8. Functional Test Cases
 
-The following cases are the authoritative functional test catalog. Test cases marked **Automated** are currently implemented in `tests/`.
+The following cases are the authoritative functional test catalog. **Actual result** records the latest execution evidence; planned cases are explicitly marked **Not executed**.
 
 ### 8.1 Health and routing
 
-| ID | Test case | Preconditions | Steps | Expected result | Status |
-|---|---|---|---|---|---|
-| FT-HEALTH-001 | Health endpoint returns service status | API application can start | Send `GET /health` | HTTP `200`; body is `{"status":"ok","service":"trailblazer-api"}` | Automated |
-| FT-HEALTH-002 | Unknown route returns not found | API is running | Send `GET /unknown-route` | HTTP `404` | Planned |
-| FT-HEALTH-003 | All route groups are registered | API is running | Inspect OpenAPI routes or call representative endpoints | Assessment, progress, roadmap, scheduler, and AI routes are registered | Planned |
+| ID | Test case | Preconditions | Steps | Expected result | Actual result | Execution status |
+|---|---|---|---|---|---|---|
+| FT-HEALTH-001 | Health endpoint returns service status | API application can start | Send `GET /health` | HTTP `200`; body is `{"status":"ok","service":"trailblazer-api"}` | HTTP `200`; exact expected JSON returned | **PASS** |
+| FT-HEALTH-002 | Unknown route returns not found | API is running | Send `GET /unknown-route` | HTTP `404` | Not executed | **NOT EXECUTED** |
+| FT-HEALTH-003 | All route groups are registered | API is running | Inspect OpenAPI routes or call representative endpoints | Assessment, progress, roadmap, scheduler, and AI routes are registered | Not executed | **NOT EXECUTED** |
 
 ### 8.2 Assessment API
 
-| ID | Test case | Preconditions | Steps | Expected result | Status |
-|---|---|---|---|---|---|
-| FT-ASSESS-001 | Start a new assessment | User and topic identifiers are available | `POST /api/assessment/start` with `user_id` and `topic_id` | HTTP `200`; session key is `<user_id>:<topic_id>`; starting difficulty is `3` | Automated |
-| FT-ASSESS-002 | Restart an existing assessment | An assessment exists for the same user/topic | Start the same assessment again | Existing session is replaced with a fresh assessor at difficulty `3` | Planned |
-| FT-ASSESS-003 | Retrieve a question at a difficulty | Matching question exists | `GET /api/assessment/question/{topic_id}?difficulty=3` | HTTP `200`; matching question is returned | Automated |
-| FT-ASSESS-004 | Retrieve a missing question | No matching question exists | Request an unavailable topic or difficulty | HTTP `404`; detail states no question was found | Automated |
-| FT-ASSESS-005 | Submit a correct answer | Question and options exist | Submit a valid option marked correct | HTTP `200`; next difficulty increases unless at maximum | Automated |
-| FT-ASSESS-006 | Submit an incorrect answer | Question and options exist | Submit a valid incorrect option | HTTP `200`; next difficulty decreases unless at minimum | Planned |
-| FT-ASSESS-007 | Submit answer for unknown question | No matching question exists | Submit an unknown `question_id` | HTTP `404`; detail states question was not found | Automated |
-| FT-ASSESS-008 | Submit answer without a prior session | Question exists | Submit an answer for a new user/topic | A session is initialized from `current_difficulty`; response is valid | Planned |
-| FT-ASSESS-009 | Confirm maximum-difficulty peak | Session is at difficulty `5` | Submit a correct answer | `peak_found` is true and `peak_difficulty` is `5` | Unit automated |
-| FT-ASSESS-010 | Confirm minimum-difficulty failure | Session is at difficulty `1` | Submit an incorrect answer | `peak_found` is true and `peak_difficulty` is `0` | Unit automated |
-| FT-ASSESS-011 | Reject invalid option index | Question has fewer options than selected index | Submit an out-of-range `selected_option` | Request is rejected with a controlled client error; no unhandled exception | Planned |
-| FT-ASSESS-012 | Persist peak progress | Assessment reaches a confirmed peak | Submit the answer that confirms the peak | `user_progress` is upserted; completed status is used for mastery score at least `60`; session is removed | Planned |
-| FT-ASSESS-013 | Preserve independent user sessions | Two users assess the same topic | Interleave answers from both users | Each user receives independent difficulty and history | Planned |
+| ID | Test case | Preconditions | Steps | Expected result | Actual result | Execution status |
+|---|---|---|---|---|---|---|
+| FT-ASSESS-001 | Start a new assessment | User and topic identifiers are available | `POST /api/assessment/start` with `user_id` and `topic_id` | HTTP `200`; session key is `<user_id>:<topic_id>`; starting difficulty is `3` | HTTP `200`; assessment request completed and subsequent answer used the session | **PASS** |
+| FT-ASSESS-002 | Restart an existing assessment | An assessment exists for the same user/topic | Start the same assessment again | Existing session is replaced with a fresh assessor at difficulty `3` | Not executed | **NOT EXECUTED** |
+| FT-ASSESS-003 | Retrieve a question at a difficulty | Matching question exists | `GET /api/assessment/question/{topic_id}?difficulty=3` | HTTP `200`; matching question is returned | HTTP `200`; matching question was returned | **PASS** |
+| FT-ASSESS-004 | Retrieve a missing question | No matching question exists | Request an unavailable topic or difficulty | HTTP `404`; detail states no question was found | HTTP `404` for missing question | **PASS** |
+| FT-ASSESS-005 | Submit a correct answer | Question and options exist | Submit a valid option marked correct | HTTP `200`; next difficulty increases unless at maximum | HTTP `200`; `next_difficulty` was `4` from `3` | **PASS** |
+| FT-ASSESS-006 | Submit an incorrect answer | Question and options exist | Submit a valid incorrect option | HTTP `200`; next difficulty decreases unless at minimum | Not executed | **NOT EXECUTED** |
+| FT-ASSESS-007 | Submit answer for unknown question | No matching question exists | Submit an unknown `question_id` | HTTP `404`; detail states question was not found | HTTP `404` for unknown question | **PASS** |
+| FT-ASSESS-008 | Submit answer without a prior session | Question exists | Submit an answer for a new user/topic | A session is initialized from `current_difficulty`; response is valid | Not executed | **NOT EXECUTED** |
+| FT-ASSESS-009 | Confirm maximum-difficulty peak | Session is at difficulty `5` | Submit a correct answer | `peak_found` is true and `peak_difficulty` is `5` | `peak_found=True`; `peak_difficulty=5` | **PASS** |
+| FT-ASSESS-010 | Confirm minimum-difficulty failure | Session is at difficulty `1` | Submit an incorrect answer | `peak_found` is true and `peak_difficulty` is `0` | `peak_found=True`; `peak_difficulty=0` | **PASS** |
+| FT-ASSESS-011 | Reject invalid option index | Question has fewer options than selected index | Submit an out-of-range `selected_option` | Request is rejected with a controlled client error; no unhandled exception | Not executed | **NOT EXECUTED** |
+| FT-ASSESS-012 | Persist peak progress | Assessment reaches a confirmed peak | Submit the answer that confirms the peak | `user_progress` is upserted; completed status is used for mastery score at least `60`; session is removed | Not executed | **NOT EXECUTED** |
+| FT-ASSESS-013 | Preserve independent user sessions | Two users assess the same topic | Interleave answers from both users | Each user receives independent difficulty and history | Not executed | **NOT EXECUTED** |
 
 ### 8.3 Progress API
 
-| ID | Test case | Preconditions | Steps | Expected result | Status |
-|---|---|---|---|---|---|
-| FT-PROG-001 | Insert progress for a new topic | No existing progress row | `POST /api/progress/update` | HTTP `200`; one progress row is inserted | Automated |
-| FT-PROG-002 | Update existing progress | Existing user/topic progress row | Post a new status and score | Existing row is updated rather than duplicated | Planned |
-| FT-PROG-003 | Clamp score above database maximum | No existing progress row | Submit `mastery_score=120` | Stored score is `99.99` | Automated |
-| FT-PROG-004 | Accept default mastery score | Request omits mastery score | Post a valid status | Default score is applied and stored within the supported range | Planned |
-| FT-PROG-005 | Complete a prerequisite | Dependent topic is locked and prerequisite relation exists | Mark prerequisite completed | Dependent topic becomes `unlocked` when all prerequisites are complete | Automated |
-| FT-PROG-006 | Keep dependent topic locked | Dependent topic has multiple prerequisites | Complete only one prerequisite | Dependent topic remains locked | Planned |
-| FT-PROG-007 | Retrieve user progress | Progress rows exist | `GET /api/progress/{user_id}` | HTTP `200`; response contains user ID and all matching progress rows | Automated |
-| FT-PROG-008 | Retrieve empty progress | User has no rows | Request progress | HTTP `200`; `progress` is an empty list | Planned |
-| FT-PROG-009 | Handle completed topic without dependents | Topic has no dependent topics | Mark it completed | Update succeeds without unnecessary dependent updates | Planned |
-| FT-PROG-010 | Validate negative score behavior | API accepts the request schema | Submit a negative mastery score | Behavior is explicitly defined and tested; negative persisted scores should be rejected or normalized | Planned |
+| ID | Test case | Preconditions | Steps | Expected result | Actual result | Execution status |
+|---|---|---|---|---|---|---|
+| FT-PROG-001 | Insert progress for a new topic | No existing progress row | `POST /api/progress/update` | HTTP `200`; one progress row is inserted | HTTP `200`; progress was inserted and returned by the follow-up GET | **PASS** |
+| FT-PROG-002 | Update existing progress | Existing user/topic progress row | Post a new status and score | Existing row is updated rather than duplicated | Not executed | **NOT EXECUTED** |
+| FT-PROG-003 | Clamp score above database maximum | No existing progress row | Submit `mastery_score=120` | Stored score is `99.99` | Stored fake-database value was `99.99` | **PASS** |
+| FT-PROG-004 | Accept default mastery score | Request omits mastery score | Post a valid status | Default score is applied and stored within the supported range | Not executed | **NOT EXECUTED** |
+| FT-PROG-005 | Complete a prerequisite | Dependent topic is locked and prerequisite relation exists | Mark prerequisite completed | Dependent topic becomes `unlocked` when all prerequisites are complete | Dependent topic status changed from `locked` to `unlocked` | **PASS** |
+| FT-PROG-006 | Keep dependent topic locked | Dependent topic has multiple prerequisites | Complete only one prerequisite | Dependent topic remains locked | Not executed | **NOT EXECUTED** |
+| FT-PROG-007 | Retrieve user progress | Progress rows exist | `GET /api/progress/{user_id}` | HTTP `200`; response contains user ID and all matching progress rows | HTTP `200`; response contained user ID and stored progress | **PASS** |
+| FT-PROG-008 | Retrieve empty progress | User has no rows | Request progress | HTTP `200`; `progress` is an empty list | Not executed | **NOT EXECUTED** |
+| FT-PROG-009 | Handle completed topic without dependents | Topic has no dependent topics | Mark it completed | Update succeeds without unnecessary dependent updates | Not executed | **NOT EXECUTED** |
+| FT-PROG-010 | Validate negative score behavior | API accepts the request schema | Submit a negative mastery score | Behavior is explicitly defined and tested; negative persisted scores should be rejected or normalized | Not executed | **NOT EXECUTED** |
 
 ### 8.4 Roadmap API
 
-| ID | Test case | Preconditions | Steps | Expected result | Status |
-|---|---|---|---|---|---|
-| FT-ROADMAP-001 | Return missing-roadmap error | User has no personalized topics | `GET /api/roadmap/{user_id}` | HTTP `404`; onboarding message is returned | Automated |
-| FT-ROADMAP-002 | Return roadmap with progress | User topics and progress exist | Request roadmap | HTTP `200`; roadmap includes statuses, mastery, totals, and progress percentage | Automated |
-| FT-ROADMAP-003 | Mark completed topics | A topic has completed progress | Request roadmap | Topic status is `completed`; completed count is incremented | Automated |
-| FT-ROADMAP-004 | Calculate zero progress safely | Roadmap exists with no completed topics | Request roadmap | Progress percentage is `0` | Planned |
-| FT-ROADMAP-005 | Generate beginner roadmap | Base topics exist | Post career goal, beginner experience, and weekly hours | Personalized topics are created; profile is marked onboarded | Planned |
-| FT-ROADMAP-006 | Generate intermediate roadmap | Base topics exist | Generate with intermediate experience | Experience-specific introductory topics are skipped | Planned |
-| FT-ROADMAP-007 | Generate advanced roadmap | Base topics exist | Generate with advanced experience | Advanced skip list is applied | Planned |
-| FT-ROADMAP-008 | Handle unknown career goal | Base topics exist | Generate an unsupported career | Full-stack fallback is used according to the current implementation | Planned |
-| FT-ROADMAP-009 | Handle missing base topics | No base topics exist | Generate a roadmap | HTTP `404`; base-topic error is returned | Planned |
-| FT-ROADMAP-010 | Handle no matching topic titles | Base topics do not match selected career list | Generate a roadmap | HTTP `404`; matching-topic error is returned | Planned |
-| FT-ROADMAP-011 | Handle valid AI priority response | Groq returns valid JSON | Generate a roadmap | Returned priorities are applied to inserted topics | Planned |
-| FT-ROADMAP-012 | Handle malformed AI priority response | Groq returns malformed JSON | Generate a roadmap | Generation continues using original priorities | Planned |
-| FT-ROADMAP-013 | Copy prerequisites correctly | Selected topics have prerequisite relations | Generate a roadmap | Relations between inserted topic copies are preserved | Planned |
-| FT-ROADMAP-014 | Initialize progress states | Generated topics include root and dependent topics | Generate a roadmap | Root topics are unlocked; dependent topics are locked | Planned |
-| FT-ROADMAP-015 | Apply assessment scores | Personalized topics exist | Post topic scores | Scores under `40` become unlocked, `40–79` become in progress, and `80+` become completed | Automated |
-| FT-ROADMAP-016 | Ignore unknown assessment titles | Assessment contains a title not in the user's roadmap | Post assessment | Unknown title is skipped; known topics are updated | Planned |
+| ID | Test case | Preconditions | Steps | Expected result | Actual result | Execution status |
+|---|---|---|---|---|---|---|
+| FT-ROADMAP-001 | Return missing-roadmap error | User has no personalized topics | `GET /api/roadmap/{user_id}` | HTTP `404`; onboarding message is returned | HTTP `404`; onboarding error was returned | **PASS** |
+| FT-ROADMAP-002 | Return roadmap with progress | User topics and progress exist | Request roadmap | HTTP `200`; roadmap includes statuses, mastery, totals, and progress percentage | HTTP `200`; completed count was `1` and progress percentage was `100` | **PASS** |
+| FT-ROADMAP-003 | Mark completed topics | A topic has completed progress | Request roadmap | Topic status is `completed`; completed count is incremented | Completed count was incremented to `1` | **PASS** |
+| FT-ROADMAP-004 | Calculate zero progress safely | Roadmap exists with no completed topics | Request roadmap | Progress percentage is `0` | Not executed | **NOT EXECUTED** |
+| FT-ROADMAP-005 | Generate beginner roadmap | Base topics exist | Post career goal, beginner experience, and weekly hours | Personalized topics are created; profile is marked onboarded | Not executed | **NOT EXECUTED** |
+| FT-ROADMAP-006 | Generate intermediate roadmap | Base topics exist | Generate with intermediate experience | Experience-specific introductory topics are skipped | Not executed | **NOT EXECUTED** |
+| FT-ROADMAP-007 | Generate advanced roadmap | Base topics exist | Generate with advanced experience | Advanced skip list is applied | Not executed | **NOT EXECUTED** |
+| FT-ROADMAP-008 | Handle unknown career goal | Base topics exist | Generate an unsupported career | Full-stack fallback is used according to the current implementation | Not executed | **NOT EXECUTED** |
+| FT-ROADMAP-009 | Handle missing base topics | No base topics exist | Generate a roadmap | HTTP `404`; base-topic error is returned | Not executed | **NOT EXECUTED** |
+| FT-ROADMAP-010 | Handle no matching topic titles | Base topics do not match selected career list | Generate a roadmap | HTTP `404`; matching-topic error is returned | Not executed | **NOT EXECUTED** |
+| FT-ROADMAP-011 | Handle valid AI priority response | Groq returns valid JSON | Generate a roadmap | Returned priorities are applied to inserted topics | Not executed | **NOT EXECUTED** |
+| FT-ROADMAP-012 | Handle malformed AI priority response | Groq returns malformed JSON | Generate a roadmap | Generation continues using original priorities | Not executed | **NOT EXECUTED** |
+| FT-ROADMAP-013 | Copy prerequisites correctly | Selected topics have prerequisite relations | Generate a roadmap | Relations between inserted topic copies are preserved | Not executed | **NOT EXECUTED** |
+| FT-ROADMAP-014 | Initialize progress states | Generated topics include root and dependent topics | Generate a roadmap | Root topics are unlocked; dependent topics are locked | Not executed | **NOT EXECUTED** |
+| FT-ROADMAP-015 | Apply assessment scores | Personalized topics exist | Post topic scores | Scores under `40` become unlocked, `40–79` become in progress, and `80+` become completed | HTTP `200`; score `85` produced `completed` progress | **PASS** |
+| FT-ROADMAP-016 | Ignore unknown assessment titles | Assessment contains a title not in the user's roadmap | Post assessment | Unknown title is skipped; known topics are updated | Not executed | **NOT EXECUTED** |
 
 ### 8.5 Scheduler API
 
-| ID | Test case | Preconditions | Steps | Expected result | Status |
-|---|---|---|---|---|---|
-| FT-SCHED-001 | Reject missing profile | No profile exists | `GET /api/scheduler/{user_id}` | HTTP `404`; profile-not-found error is returned | Automated |
-| FT-SCHED-002 | Generate weekly schedule | Profile and topics exist | Request schedule | HTTP `200`; selected topics and totals are returned | Automated |
-| FT-SCHED-003 | Respect weekly-hour budget | Topics exceed available hours | Request schedule | Selected total hours do not exceed weekly hours | Automated |
-| FT-SCHED-004 | Exclude completed topics | Completed progress rows exist | Request schedule | Completed topics are not returned as available topics | Planned |
-| FT-SCHED-005 | Handle zero weekly hours | Profile has zero hours | Request schedule | Empty selection and zero totals are returned | Planned |
-| FT-SCHED-006 | Handle empty topic list | User has no available topics | Request schedule | Empty selection is returned without an error | Planned |
+| ID | Test case | Preconditions | Steps | Expected result | Actual result | Execution status |
+|---|---|---|---|---|---|---|
+| FT-SCHED-001 | Reject missing profile | No profile exists | `GET /api/scheduler/{user_id}` | HTTP `404`; profile-not-found error is returned | HTTP `404`; profile-not-found response was returned | **PASS** |
+| FT-SCHED-002 | Generate weekly schedule | Profile and topics exist | Request schedule | HTTP `200`; selected topics and totals are returned | HTTP `200`; schedule response was returned | **PASS** |
+| FT-SCHED-003 | Respect weekly-hour budget | Topics exceed available hours | Request schedule | Selected total hours do not exceed weekly hours | Returned `total_hours` was no greater than the 3-hour budget | **PASS** |
+| FT-SCHED-004 | Exclude completed topics | Completed progress rows exist | Request schedule | Completed topics are not returned as available topics | Not executed | **NOT EXECUTED** |
+| FT-SCHED-005 | Handle zero weekly hours | Profile has zero hours | Request schedule | Empty selection and zero totals are returned | Not executed | **NOT EXECUTED** |
+| FT-SCHED-006 | Handle empty topic list | User has no available topics | Request schedule | Empty selection is returned without an error | Not executed | **NOT EXECUTED** |
 
 ### 8.6 AI API
 
-| ID | Test case | Preconditions | Steps | Expected result | Status |
-|---|---|---|---|---|---|
-| FT-AI-001 | Synthesize study guide | Topic exists; Groq is mocked | `POST /api/ai/synthesize` | HTTP `200`; response includes topic ID, title, markdown, and model | Automated |
-| FT-AI-002 | Synthesize missing topic | Topic does not exist | Post synthesis request | HTTP `404`; topic-not-found error is returned | Automated |
-| FT-AI-003 | Convert Groq failure to API error | Topic exists; Groq raises an exception | Post synthesis request | HTTP `500`; Groq error is surfaced through the API error response | Planned |
-| FT-AI-004 | Tutor with new conversation | Topic exists; tutor is mocked | `POST /api/ai/tutor` with a message | HTTP `200`; assistant reply and topic title are returned | Planned |
-| FT-AI-005 | Tutor persists both messages | Tutor returns a reply | Send tutor message | User and assistant messages are inserted | Automated |
-| FT-AI-006 | Tutor limits context history | More than ten history messages are supplied | Send tutor message | Only the latest ten history messages are sent to the AI service | Planned |
-| FT-AI-007 | Tutor missing topic | Topic does not exist | Send tutor request | HTTP `404` | Planned |
-| FT-AI-008 | Retrieve ordered chat history | Chat messages exist | `GET /api/ai/history/{user_id}/{topic_id}` | HTTP `200`; messages are returned in creation order | Planned |
-| FT-AI-009 | Retrieve empty chat history | No messages exist | Request history | HTTP `200`; `messages` is an empty list | Planned |
+| ID | Test case | Preconditions | Steps | Expected result | Actual result | Execution status |
+|---|---|---|---|---|---|---|
+| FT-AI-001 | Synthesize study guide | Topic exists; Groq is mocked | `POST /api/ai/synthesize` | HTTP `200`; response includes topic ID, title, markdown, and model | HTTP `200`; markdown began with `# Python` | **PASS** |
+| FT-AI-002 | Synthesize missing topic | Topic does not exist | Post synthesis request | HTTP `404`; topic-not-found error is returned | HTTP `404`; missing-topic response was returned | **PASS** |
+| FT-AI-003 | Convert Groq failure to API error | Topic exists; Groq raises an exception | Post synthesis request | HTTP `500`; Groq error is surfaced through the API error response | Not executed | **NOT EXECUTED** |
+| FT-AI-004 | Tutor with new conversation | Topic exists; tutor is mocked | `POST /api/ai/tutor` with a message | HTTP `200`; assistant reply and topic title are returned | Not executed independently; covered by FT-AI-005's successful tutor request | **PASS (INDIRECT)** |
+| FT-AI-005 | Tutor persists both messages | Tutor returns a reply | Send tutor message | User and assistant messages are inserted | HTTP `200`; exactly 2 chat messages were persisted | **PASS** |
+| FT-AI-006 | Tutor limits context history | More than ten history messages are supplied | Send tutor message | Only the latest ten history messages are sent to the AI service | Not executed | **NOT EXECUTED** |
+| FT-AI-007 | Tutor missing topic | Topic does not exist | Send tutor request | HTTP `404` | Not executed | **NOT EXECUTED** |
+| FT-AI-008 | Retrieve ordered chat history | Chat messages exist | `GET /api/ai/history/{user_id}/{topic_id}` | HTTP `200`; messages are returned in creation order | Not executed | **NOT EXECUTED** |
+| FT-AI-009 | Retrieve empty chat history | No messages exist | Request history | HTTP `200`; `messages` is an empty list | Not executed | **NOT EXECUTED** |
 
 ## 9. Unit Test Cases
 
 ### 9.1 Hill-climbing assessor
 
-| ID | Test case | Expected result | Status |
-|---|---|---|---|
-| UT-ALG-001 | Initialize below minimum difficulty | Difficulty is clamped to `1` | Automated |
-| UT-ALG-002 | Initialize above maximum difficulty | Difficulty is clamped to `5` | Automated |
-| UT-ALG-003 | Correct answer below maximum | Difficulty increases by one | Automated |
-| UT-ALG-004 | Incorrect answer above minimum | Difficulty decreases by one | Planned |
-| UT-ALG-005 | Correct answer at maximum | Peak is found at `5` | Automated |
-| UT-ALG-006 | Incorrect answer at minimum | Peak is found at `0` | Automated |
-| UT-ALG-007 | Correct answer after failure at next level | Existing peak is confirmed | Automated |
-| UT-ALG-008 | Mastery score calculation | Score is numeric and remains between `0` and `100` | Automated |
-| UT-ALG-009 | Empty history mastery | Score is `0.0` | Planned |
+| ID | Test case | Expected result | Actual result | Execution status |
+|---|---|---|---|---|
+| UT-ALG-001 | Initialize below minimum difficulty | Difficulty is clamped to `1` | Initial difficulty was `1` for `-10` | **PASS** |
+| UT-ALG-002 | Initialize above maximum difficulty | Difficulty is clamped to `5` | Initial difficulty was `5` for `99` | **PASS** |
+| UT-ALG-003 | Correct answer below maximum | Difficulty increases by one | Difficulty changed from `3` to `4` | **PASS** |
+| UT-ALG-004 | Incorrect answer above minimum | Difficulty decreases by one | Not executed independently | **NOT EXECUTED** |
+| UT-ALG-005 | Correct answer at maximum | Peak is found at `5` | `peak_found=True`; `peak_difficulty=5` | **PASS** |
+| UT-ALG-006 | Incorrect answer at minimum | Peak is found at `0` | `peak_found=True`; `peak_difficulty=0` | **PASS** |
+| UT-ALG-007 | Correct answer after failure at next level | Existing peak is confirmed | Peak confirmed at difficulty `3` after correct/incorrect sequence | **PASS** |
+| UT-ALG-008 | Mastery score calculation | Score is numeric and remains between `0` and `100` | Mastery score was numeric and within `0–100` | **PASS** |
+| UT-ALG-009 | Empty history mastery | Score is `0.0` | Not executed | **NOT EXECUTED** |
 
 ### 9.2 Roadmap generator
 
-| ID | Test case | Expected result | Status |
-|---|---|---|---|
-| UT-ROAD-001 | Generate independent topics | All topics are returned in a valid order | Planned |
-| UT-ROAD-002 | Respect prerequisite order | Prerequisite precedes dependent topic | Automated |
-| UT-ROAD-003 | Mark mastered topic | Mastered topic is `completed` | Automated |
-| UT-ROAD-004 | Unlock topic with mastered prerequisites | Topic is `unlocked` | Automated |
-| UT-ROAD-005 | Lock topic with incomplete prerequisites | Topic is `locked` | Automated |
-| UT-ROAD-006 | Detect cyclic graph | `ValueError` with cycle message is raised | Automated |
-| UT-ROAD-007 | Limit next topics | `get_next_topics()` returns no more than requested limit | Planned |
-| UT-ROAD-008 | Handle empty topic list | Empty roadmap is returned | Planned |
+| ID | Test case | Expected result | Actual result | Execution status |
+|---|---|---|---|---|
+| UT-ROAD-001 | Generate independent topics | All topics are returned in a valid order | Not executed | **NOT EXECUTED** |
+| UT-ROAD-002 | Respect prerequisite order | Prerequisite precedes dependent topic | Returned order was `a`, `b`, `c` | **PASS** |
+| UT-ROAD-003 | Mark mastered topic | Mastered topic is `completed` | Topic `a` was marked `completed` | **PASS** |
+| UT-ROAD-004 | Unlock topic with mastered prerequisites | Topic is `unlocked` | Topic `b` was marked `unlocked` | **PASS** |
+| UT-ROAD-005 | Lock topic with incomplete prerequisites | Topic is `locked` | Topic `c` was marked `locked` | **PASS** |
+| UT-ROAD-006 | Detect cyclic graph | `ValueError` with cycle message is raised | `ValueError` containing `Cycle detected` was raised | **PASS** |
+| UT-ROAD-007 | Limit next topics | `get_next_topics()` returns no more than requested limit | Not executed | **NOT EXECUTED** |
+| UT-ROAD-008 | Handle empty topic list | Empty roadmap is returned | Not executed | **NOT EXECUTED** |
 
 ### 9.3 Knapsack scheduler
 
-| ID | Test case | Expected result | Status |
-|---|---|---|---|
-| UT-SCHED-001 | Empty topic list | Empty selection and zero totals | Automated |
-| UT-SCHED-002 | Zero capacity | Empty selection and zero totals | Automated |
-| UT-SCHED-003 | Fractional hour values | Capacity calculation supports half-hour increments | Planned |
-| UT-SCHED-004 | Budget constraint | Selected hours do not exceed capacity | Automated |
-| UT-SCHED-005 | Priority optimization | Highest-value feasible combination is selected | Automated |
-| UT-SCHED-006 | Utilization calculation | Returned utilization percentage is correct | Planned |
+| ID | Test case | Expected result | Actual result | Execution status |
+|---|---|---|---|---|
+| UT-SCHED-001 | Empty topic list | Empty selection and zero totals | Empty selection and zero totals returned | **PASS** |
+| UT-SCHED-002 | Zero capacity | Empty selection and zero totals | Empty selection returned for zero capacity | **PASS** |
+| UT-SCHED-003 | Fractional hour values | Capacity calculation supports half-hour increments | Not executed independently | **NOT EXECUTED** |
+| UT-SCHED-004 | Budget constraint | Selected hours do not exceed capacity | Selected total was `3` hours for a 3-hour budget | **PASS** |
+| UT-SCHED-005 | Priority optimization | Highest-value feasible combination is selected | Total priority was `12` for the expected selection | **PASS** |
+| UT-SCHED-006 | Utilization calculation | Returned utilization percentage is correct | Not executed independently | **NOT EXECUTED** |
 
 ### 9.4 Resource sorting
 
-| ID | Test case | Expected result | Status |
-|---|---|---|---|
-| UT-SORT-001 | Sort descending relevance | Highest score appears first | Automated |
-| UT-SORT-002 | Empty input | Empty list is returned | Planned |
-| UT-SORT-003 | Single-item input | Same item is returned | Planned |
-| UT-SORT-004 | Equal scores | All equal-score items are retained | Planned |
-| UT-SORT-005 | Missing key | Error behavior is explicit and controlled | Planned |
+| ID | Test case | Expected result | Actual result | Execution status |
+|---|---|---|---|---|
+| UT-SORT-001 | Sort descending relevance | Highest score appears first | Scores returned in order `10, 5, 2` | **PASS** |
+| UT-SORT-002 | Empty input | Empty list is returned | Not executed | **NOT EXECUTED** |
+| UT-SORT-003 | Single-item input | Same item is returned | Not executed | **NOT EXECUTED** |
+| UT-SORT-004 | Equal scores | All equal-score items are retained | Not executed | **NOT EXECUTED** |
+| UT-SORT-005 | Missing key | Error behavior is explicit and controlled | Not executed | **NOT EXECUTED** |
 
 ## 10. Performance and Load Test Cases
 
 ### 10.1 Benchmark cases
 
-| ID | Test case | Workload | Expected result | Status |
-|---|---|---|---|---|
-| PT-BENCH-001 | Roadmap generation at 100 topics | 100 nodes and 99 prerequisite edges | Benchmark completes and result is valid | Benchmark |
-| PT-BENCH-002 | Roadmap generation at 1,000 topics | 1,000 nodes and 999 prerequisite edges | Benchmark completes without excessive memory use | Benchmark |
-| PT-BENCH-003 | Scheduler benchmark | 100 topics and 40 weekly hours | Benchmark completes and output respects budget | Benchmark |
-| PT-BENCH-004 | Resource sorting benchmark | 1,000 resources | Benchmark completes with sorted output | Benchmark |
-| PT-BENCH-005 | Roadmap generation at 10,000 topics | 10,000-node graph | Establish upper-bound latency and memory behavior | Planned |
-| PT-BENCH-006 | Scheduler with large capacity | Large topic list and high weekly-hour capacity | Identify dynamic-programming memory growth | Planned |
+| ID | Test case | Workload | Expected result | Actual result | Execution status |
+|---|---|---|---|---|---|
+| PT-BENCH-001 | Roadmap generation at 100 topics | 100 nodes and 99 prerequisite edges | Benchmark completes and result is valid | Mean `1,435.06 µs`; benchmark passed | **PASS** |
+| PT-BENCH-002 | Roadmap generation at 1,000 topics | 1,000 nodes and 999 prerequisite edges | Benchmark completes without excessive memory use | Mean `118,180.07 µs`; benchmark passed | **PASS** |
+| PT-BENCH-003 | Scheduler benchmark | 100 topics and 40 weekly hours | Benchmark completes and output respects budget | Mean `21,892.09 µs`; benchmark passed | **PASS** |
+| PT-BENCH-004 | Resource sorting benchmark | 1,000 resources | Benchmark completes with sorted output | Mean `18,704.30 µs`; benchmark passed | **PASS** |
+| PT-BENCH-005 | Roadmap generation at 10,000 topics | 10,000-node graph | Establish upper-bound latency and memory behavior | Not executed | **NOT EXECUTED** |
+| PT-BENCH-006 | Scheduler with large capacity | Large topic list and high weekly-hour capacity | Identify dynamic-programming memory growth | Not executed | **NOT EXECUTED** |
 
 ### 10.2 Load cases
 
-| ID | Test case | Workload | Measurements | Acceptance target | Status |
-|---|---|---|---|---|---|
-| PT-LOAD-001 | Baseline load | 1–5 users for 5 minutes | Throughput, P50, P95, errors | Establish baseline; no unexpected errors | Planned |
-| PT-LOAD-002 | Expected concurrent load | 25–50 users | P50, P95, P99, CPU, memory | P95 under `500 ms` for non-AI endpoints; error rate under `1%` | Planned |
-| PT-LOAD-003 | Stress test | Increase users until threshold breach | Maximum sustainable throughput | Threshold and failure mode are recorded | Planned |
-| PT-LOAD-004 | Spike test | Increase rapidly from 5 to 100 users | Recovery time and errors | Service recovers without restart | Planned |
-| PT-LOAD-005 | Soak test | Normal traffic for 1–4 hours | Memory, errors, latency drift | No material memory leak or latency drift | Planned |
-| PT-LOAD-006 | Assessment concurrency | Concurrent answers for same and different users | Session consistency | No cross-user state contamination | Planned |
-| PT-LOAD-007 | Roadmap generation load | Concurrent generation requests | Database writes, duration, failures | No partial or orphaned roadmap state | Planned |
-| PT-LOAD-008 | AI isolation load | Stubbed slow, fast, timeout, and rate-limit responses | API latency and error handling | AI failures do not crash unrelated endpoints | Planned |
+| ID | Test case | Workload | Measurements | Acceptance target | Actual result | Execution status |
+|---|---|---|---|---|---|---|
+| PT-LOAD-001 | Baseline load | 1–5 users for 5 minutes | Throughput, P50, P95, errors | Establish baseline; no unexpected errors | Not executed | **NOT EXECUTED** |
+| PT-LOAD-002 | Expected concurrent load | 25–50 users | P50, P95, P99, CPU, memory | P95 under `500 ms` for non-AI endpoints; error rate under `1%` | Not executed | **NOT EXECUTED** |
+| PT-LOAD-003 | Stress test | Increase users until threshold breach | Maximum sustainable throughput | Threshold and failure mode are recorded | Not executed | **NOT EXECUTED** |
+| PT-LOAD-004 | Spike test | Increase rapidly from 5 to 100 users | Recovery time and errors | Service recovers without restart | Not executed | **NOT EXECUTED** |
+| PT-LOAD-005 | Soak test | Normal traffic for 1–4 hours | Memory, errors, latency drift | No material memory leak or latency drift | Not executed | **NOT EXECUTED** |
+| PT-LOAD-006 | Assessment concurrency | Concurrent answers for same and different users | Session consistency | No cross-user state contamination | Not executed | **NOT EXECUTED** |
+| PT-LOAD-007 | Roadmap generation load | Concurrent generation requests | Database writes, duration, failures | No partial or orphaned roadmap state | Not executed | **NOT EXECUTED** |
+| PT-LOAD-008 | AI isolation load | Stubbed slow, fast, timeout, and rate-limit responses | API latency and error handling | AI failures do not crash unrelated endpoints | Not executed | **NOT EXECUTED** |
 
 The current Locust scenario covers health, progress, roadmap, and scheduler reads with weighted tasks. It does not call real AI endpoints and should not be used against production services without a dedicated test plan.
 
 ## 11. CI/CD Test Cases
 
-| ID | Test case | Trigger | Expected result | Status |
-|---|---|---|---|---|
-| CI-001 | CI on push to main | Push commit to `main` | Workflow starts and runs the test job | Implemented |
-| CI-002 | CI on feature branch push | Push to `loitongbam-david-*` branch | Workflow starts and runs the test job | Implemented |
-| CI-003 | CI on pull request | Open or update PR targeting `main` | Workflow starts and must pass before merge | Implemented |
-| CI-004 | Python version selection | Workflow starts | Python version is read from `runtime.txt` | Implemented |
-| CI-005 | Dependency installation | Workflow reaches install step | `requirements-dev.txt` installs successfully | Implemented |
-| CI-006 | Test execution | Install succeeds | Pytest completes successfully and writes JUnit XML | Implemented |
-| CI-007 | Test result artifact | Test job succeeds or fails | `test-results.xml` is uploaded using `if: always()` | Implemented |
-| CI-008 | Failing test blocks CI | Introduce a controlled failing test | Job fails and PR cannot be treated as passing | Planned |
-| CI-009 | Dependency cache reuse | Run workflow twice | Pip cache is restored on the second run when dependency files are unchanged | Planned |
+| ID | Test case | Trigger | Expected result | Actual result | Execution status |
+|---|---|---|---|---|---|
+| CI-001 | CI on push to main | Push commit to `main` | Workflow starts and runs the test job | Workflow definition present; live main-branch run not verified in this execution | **CONFIGURED** |
+| CI-002 | CI on feature branch push | Push to `loitongbam-david-*` branch | Workflow starts and runs the test job | Workflow definition present; live feature-branch run not verified in this execution | **CONFIGURED** |
+| CI-003 | CI on pull request | Open or update PR targeting `main` | Workflow starts and must pass before merge | Workflow definition present; PR trigger configured | **CONFIGURED** |
+| CI-004 | Python version selection | Workflow starts | Python version is read from `runtime.txt` | Workflow contains `python-version-file: runtime.txt` | **CONFIGURED** |
+| CI-005 | Dependency installation | Workflow reaches install step | `requirements-dev.txt` installs successfully | Local equivalent dependencies installed successfully | **PASS (LOCAL)** |
+| CI-006 | Test execution | Install succeeds | Pytest completes successfully and writes JUnit XML | Local Pytest run completed with 27 passed and generated `test-results.xml` | **PASS (LOCAL)** |
+| CI-007 | Test result artifact | Test job succeeds or fails | `test-results.xml` is uploaded using `if: always()` | Workflow contains artifact upload with `if: always()` | **CONFIGURED** |
+| CI-008 | Failing test blocks CI | Introduce a controlled failing test | Job fails and PR cannot be treated as passing | Not executed | **NOT EXECUTED** |
+| CI-009 | Dependency cache reuse | Run workflow twice | Pip cache is restored on the second run when dependency files are unchanged | Not executed | **NOT EXECUTED** |
 
 ## 12. Defect Classification
 
